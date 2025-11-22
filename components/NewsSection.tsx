@@ -51,10 +51,10 @@ export default function NewsSection({ trendingNews, allNews }: NewsSectionProps)
               {featuredNews.urlToImage && (
                 <div className="md:w-1/2 h-64 md:h-auto bg-gray-200 overflow-hidden relative">
                   <ImageWithFallback
-                    key={`featured-${featuredNews.id}-${featuredNews.urlToImage?.substring(0, 50)}`}
                     src={featuredNews.urlToImage}
                     alt={featuredNews.title}
                     fill
+                    uniqueId={`featured-${featuredNews.id}`}
                     className="hover:scale-105 transition-transform duration-300"
                   />
                 </div>

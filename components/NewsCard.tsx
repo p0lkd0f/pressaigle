@@ -18,10 +18,10 @@ export default function NewsCard({ news }: NewsCardProps) {
         {news.urlToImage && (
           <div className="h-48 bg-gray-200 overflow-hidden relative">
             <ImageWithFallback
-              key={`${news.id}-${news.urlToImage?.substring(0, 50)}`}
               src={news.urlToImage}
               alt={news.title}
               fill
+              uniqueId={news.id}
               className="hover:scale-105 transition-transform duration-300"
             />
           </div>
