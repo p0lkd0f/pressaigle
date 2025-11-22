@@ -3,7 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ContentRenderer from '@/components/ContentRenderer';
 import ImageWithFallback from '@/components/ImageWithFallback';
-import { getNewsById, fetchTrendingNews, setNewsCache, fetchFullArticleContent } from '@/lib/news';
+import { getNewsById, fetchTrendingNews, setNewsCache, fetchFullArticleContent, NewsArticle } from '@/lib/news';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
