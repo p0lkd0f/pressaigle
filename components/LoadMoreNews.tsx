@@ -6,25 +6,43 @@ import NewsCard from './NewsCard';
 
 interface LoadMoreNewsProps {
   initialNews: NewsArticle[];
+  hasMoreInitial?: boolean;
 }
 
-export default function LoadMoreNews({ initialNews }: LoadMoreNewsProps) {
+export default function LoadMoreNews({ initialNews, hasMoreInitial = true }: LoadMoreNewsProps) {
   const [news, setNews] = useState(initialNews);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(hasMoreInitial);
 
   const loadMore = async () => {
     if (loading || !hasMore) return;
     
     setLoading(true);
     try {
-      const response = await fetch(`/api/news?page=${page + 1}&limit=6`);
+      const nextPage = page + 1;
+      const response = await fetch(`/api/news?page=${nextPage}&limit=6`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       
+      if (data.error) {
+        console.error('API error:', data.error);
+        setHasMore(false);
+        return;
+      }
+      
       if (data.news && data.news.length > 0) {
-        setNews(prev => [...prev, ...data.news]);
-        setPage(prev => prev + 1);
+        // Filter out duplicates by ID
+        setNews(prev => {
+          const existingIds = new Set(prev.map(n => n.id));
+          const newNews = data.news.filter((n: NewsArticle) => n.id && !existingIds.has(n.id));
+          return [...prev, ...newNews];
+        });
+        setPage(nextPage);
         setHasMore(data.hasMore);
       } else {
         setHasMore(false);

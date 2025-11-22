@@ -14,11 +14,15 @@ export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const articles = getAllArticles();
-  // Always fetch fresh news from API
-  const trendingNews = await fetchTrendingNews();
+  // Always fetch fresh news from API - fetch first page with more articles for pagination
+  const allTrendingNews = await fetchTrendingNews(1, 20);
   
-  // Cache news for detail page access
-  setNewsCache(trendingNews);
+  // Show first 6 articles initially, rest will be loaded via Load More
+  const initialNews = allTrendingNews.slice(0, 6);
+  const remainingNews = allTrendingNews.slice(6);
+  
+  // Cache all news for detail page access
+  setNewsCache(allTrendingNews);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -44,7 +48,7 @@ export default async function Home() {
 
         {/* News Section */}
         <section id="news" className="mb-16">
-          <NewsSection trendingNews={trendingNews} />
+          <NewsSection trendingNews={initialNews} allNews={allTrendingNews} />
         </section>
 
         {/* Articles Section */}

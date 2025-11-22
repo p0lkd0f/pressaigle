@@ -7,19 +7,37 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '6');
 
   try {
-    const news = await fetchTrendingNews();
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedNews = news.slice(startIndex, endIndex);
-
-    return NextResponse.json({
-      news: paginatedNews,
-      total: news.length,
-      page,
-      limit,
-      hasMore: endIndex < news.length,
-    });
+    // Fetch articles from NewsAPI with pagination
+    // NewsAPI supports pagination via the 'page' parameter
+    // Fetch the requested page directly from NewsAPI
+    const news = await fetchTrendingNews(page, limit);
+    
+    // Check if we got articles
+    if (news && news.length > 0) {
+      // Calculate if there are more pages
+      // NewsAPI free tier typically returns up to 100 results total
+      // If we got the full limit, there might be more
+      const hasMore = news.length >= limit;
+      
+      return NextResponse.json({
+        news: news,
+        total: news.length,
+        page,
+        limit,
+        hasMore: hasMore,
+      });
+    } else {
+      // No more articles
+      return NextResponse.json({
+        news: [],
+        total: 0,
+        page,
+        limit,
+        hasMore: false,
+      });
+    }
   } catch (error: any) {
+    console.error('News API error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch news', details: error.message },
       { status: 500 }

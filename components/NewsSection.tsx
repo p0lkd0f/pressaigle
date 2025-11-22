@@ -8,15 +8,21 @@ import LoadMoreNews from './LoadMoreNews';
 
 interface NewsSectionProps {
   trendingNews: NewsArticle[];
+  allNews?: NewsArticle[]; // All fetched news for Load More
 }
 
-export default function NewsSection({ trendingNews }: NewsSectionProps) {
+export default function NewsSection({ trendingNews, allNews }: NewsSectionProps) {
   if (trendingNews.length === 0) {
     return null;
   }
 
   const featuredNews = trendingNews[0];
   const otherNews = trendingNews.slice(1);
+  
+  // If we have more news available, use it for Load More
+  const newsForLoadMore = allNews && allNews.length > trendingNews.length 
+    ? allNews.slice(trendingNews.length) 
+    : otherNews;
 
   return (
     <div>
@@ -91,7 +97,7 @@ export default function NewsSection({ trendingNews }: NewsSectionProps) {
 
       {/* Other News Grid with Load More */}
       {otherNews.length > 0 && (
-        <LoadMoreNews initialNews={otherNews} />
+        <LoadMoreNews initialNews={otherNews} hasMoreInitial={!!(allNews && allNews.length > trendingNews.length)} />
       )}
     </div>
   );

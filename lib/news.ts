@@ -34,9 +34,9 @@ if (process.env.NODE_ENV === 'development') {
   console.log('News API Key configured:', !!NEWS_API_KEY && NEWS_API_KEY !== 'demo');
 }
 
-// Fetch trending news articles
+// Fetch trending news articles with pagination support
 // Always fetches fresh data from API (no caching at function level)
-export async function fetchTrendingNews(): Promise<NewsArticle[]> {
+export async function fetchTrendingNews(page: number = 1, pageSize: number = 20): Promise<NewsArticle[]> {
   try {
     if (!NEWS_API_KEY || NEWS_API_KEY === 'demo') {
       console.warn('News API key not configured. Using fallback data.');
@@ -46,16 +46,16 @@ export async function fetchTrendingNews(): Promise<NewsArticle[]> {
     
     // Log API key status in development
     if (process.env.NODE_ENV === 'development') {
-      console.log('Fetching fresh news from NewsAPI...');
+      console.log(`Fetching fresh news from NewsAPI... page=${page}, pageSize=${pageSize}`);
     }
 
-    // Try to get more content using the 'everything' endpoint with popular topics
-    // This sometimes provides more detailed content
+    // Fetch news - Fetch max articles (100) and paginate client-side
+    // This ensures we get different articles for each page request
     const response = await axios.get('https://newsapi.org/v2/top-headlines', {
       params: {
         country: 'us',
         language: 'en',
-        pageSize: 6,
+        pageSize: 100, // Fetch max to have enough for pagination
         apiKey: NEWS_API_KEY,
       },
       timeout: 10000,
@@ -64,12 +64,21 @@ export async function fetchTrendingNews(): Promise<NewsArticle[]> {
       },
     });
     
+    // Store total results for pagination info
+    const totalResults = response.data.totalResults || 0;
+    
     if (response.data.articles && response.data.articles.length > 0) {
+      // Filter all articles first
+      const allFilteredArticles = response.data.articles
+        .filter((article: any) => article.title && article.description);
+      
+      // Paginate client-side
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedArticles = allFilteredArticles.slice(startIndex, endIndex);
+      
       // First, map articles to get basic structure
-      const articles = response.data.articles
-        .filter((article: any) => article.title && article.description)
-        .slice(0, 6)
-        .map((article: any) => {
+      const articles = paginatedArticles.map((article: any) => {
           const publishedAt = article.publishedAt || new Date().toISOString();
           const title = article.title || 'News Article';
           const source = article.source?.name || 'News Source';
@@ -147,7 +156,10 @@ export async function fetchTrendingNews(): Promise<NewsArticle[]> {
       // Log success in development
       if (process.env.NODE_ENV === 'development') {
         const articlesWithImages = articlesWithFullContent.filter(a => a.urlToImage).length;
-        console.log(`Successfully fetched ${articlesWithFullContent.length} news articles (${articlesWithImages} with images)`);
+        const startIdx = (page - 1) * pageSize;
+        const endIdx = startIdx + pageSize;
+        console.log(`Page ${page}: Showing ${articlesWithFullContent.length} articles (${articlesWithImages} with images) from ${allFilteredArticles.length} total available`);
+        console.log(`Total results from API: ${totalResults}, Range: ${startIdx + 1}-${Math.min(endIdx, allFilteredArticles.length)} of ${allFilteredArticles.length}`);
         // Log unique image URLs to debug
         const imageUrls = articlesWithFullContent
           .filter(a => a.urlToImage)
