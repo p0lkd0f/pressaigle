@@ -46,42 +46,54 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
   });
 
   const contentValue = watch('content');
-  const turndownServiceRef = useRef<any>(null);
 
-  // Initialize turndown for HTML to Markdown conversion (client-side only)
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !turndownServiceRef.current) {
-      import('turndown').then((TurndownModule: any) => {
-        import('turndown-plugin-gfm').then((gfmModule: any) => {
-          const TurndownService = TurndownModule.default || TurndownModule;
-          const { gfm } = gfmModule;
-          
-          const service = new TurndownService({
-            headingStyle: 'atx',
-            codeBlockStyle: 'fenced',
-          });
-          if (gfm) {
-            service.use(gfm);
-          }
-          turndownServiceRef.current = service;
-        }).catch(() => {
-          // If gfm plugin fails, continue without it
-          const TurndownService = TurndownModule.default || TurndownModule;
-          const service = new TurndownService({
-            headingStyle: 'atx',
-            codeBlockStyle: 'fenced',
-          });
-          turndownServiceRef.current = service;
-        });
-      }).catch(() => {
-        // If turndown fails to load, just continue without it
-        console.warn('Turndown service not available');
-      });
-    }
-  }, []);
-
-  const getTurndownService = () => {
-    return turndownServiceRef.current;
+  // Simple HTML to Markdown converter (no external dependencies)
+  const htmlToMarkdown = (html: string): string => {
+    if (!html) return '';
+    
+    let md = html
+      // Remove script and style tags
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      // Headers
+      .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n')
+      .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n')
+      .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n')
+      .replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1\n\n')
+      .replace(/<h5[^>]*>(.*?)<\/h5>/gi, '##### $1\n\n')
+      .replace(/<h6[^>]*>(.*?)<\/h6>/gi, '###### $1\n\n')
+      // Bold and italic
+      .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
+      .replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**')
+      .replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
+      .replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*')
+      // Links
+      .replace(/<a[^>]*href=["']([^"']*)["'][^>]*>(.*?)<\/a>/gi, '[$2]($1)')
+      // Images
+      .replace(/<img[^>]*alt=["']([^"']*)["'][^>]*>/gi, '![$1]')
+      .replace(/<img[^>]*src=["']([^"']*)["'][^>]*>/gi, '![]($1)')
+      // Code blocks
+      .replace(/<pre[^>]*><code[^>]*>(.*?)<\/code><\/pre>/gi, '```\n$1\n```')
+      .replace(/<code[^>]*>(.*?)<\/code>/gi, '`$1`')
+      // Blockquotes
+      .replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gi, '> $1')
+      // Lists
+      .replace(/<ul[^>]*>/gi, '')
+      .replace(/<\/ul>/gi, '\n')
+      .replace(/<ol[^>]*>/gi, '')
+      .replace(/<\/ol>/gi, '\n')
+      .replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n')
+      // Paragraphs
+      .replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
+      // Line breaks
+      .replace(/<br[^>]*>/gi, '\n')
+      // Remove remaining HTML tags
+      .replace(/<[^>]+>/g, '')
+      // Clean up whitespace
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    
+    return md;
   };
 
   useEffect(() => {
@@ -96,16 +108,7 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
       // Try to convert HTML to markdown
       try {
         if (article.content && article.content.includes('<')) {
-          const turndownService = getTurndownService();
-          if (turndownService) {
-            try {
-              setMarkdownContent(turndownService.turndown(article.content));
-            } catch {
-              setMarkdownContent(article.content);
-            }
-          } else {
-            setMarkdownContent(article.content);
-          }
+          setMarkdownContent(htmlToMarkdown(article.content));
         } else {
           setMarkdownContent(article.content);
         }
@@ -206,14 +209,7 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
     setHtmlContent(value);
     // Convert HTML to markdown for markdown view
     try {
-      const turndownService = getTurndownService();
-      if (turndownService) {
-        try {
-          setMarkdownContent(turndownService.turndown(value));
-        } catch {
-          // If conversion fails, keep markdown as is
-        }
-      }
+      setMarkdownContent(htmlToMarkdown(value));
     } catch (e) {
       // If conversion fails, keep markdown as is
     }
@@ -232,16 +228,7 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
     setHtmlContent(value);
     setValue('content', value);
     try {
-      const turndownService = getTurndownService();
-      if (turndownService) {
-        try {
-          setMarkdownContent(turndownService.turndown(value));
-        } catch {
-          setMarkdownContent(value);
-        }
-      } else {
-        setMarkdownContent(value);
-      }
+      setMarkdownContent(htmlToMarkdown(value));
     } catch (e) {
       setMarkdownContent(value);
     }
