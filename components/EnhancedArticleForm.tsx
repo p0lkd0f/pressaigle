@@ -130,6 +130,26 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
   }, [article, reset]);
 
   // React Quill modules configuration
+  // Fix for React Quill paste issue
+  useEffect(() => {
+    // Suppress the addRange error
+    const originalConsoleError = console.error;
+    console.error = (...args: any[]) => {
+      if (
+        typeof args[0] === 'string' &&
+        args[0].includes('addRange(): The given range isn\'t in document')
+      ) {
+        // Suppress this specific error
+        return;
+      }
+      originalConsoleError.apply(console, args);
+    };
+
+    return () => {
+      console.error = originalConsoleError;
+    };
+  }, []);
+
   const quillModules = {
     toolbar: {
       container: [
@@ -149,6 +169,10 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
         image: imageHandler,
       }
     },
+    clipboard: {
+      // Fix paste handling to prevent content loss
+      matchVisual: false,
+    },
   };
 
   const quillRef = useRef<any>(null);
@@ -166,13 +190,27 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
         const reader = new FileReader();
         reader.onload = () => {
           const base64 = reader.result as string;
-          // Find quill editor in the DOM
-          const quillEditor = document.querySelector('.ql-editor') as any;
-          if (quillEditor && quillEditor.__quill) {
-            const quill = quillEditor.__quill;
-            const range = quill.getSelection(true);
-            quill.insertEmbed(range.index, 'image', base64);
-            quill.setSelection(range.index + 1);
+          // Use the ref to get quill instance
+          const quill = quillRef.current?.getEditor();
+          if (quill) {
+            try {
+              let range = quill.getSelection(true);
+              if (!range || range.length === 0) {
+                // If no selection, insert at end
+                const length = quill.getLength();
+                range = { index: length - 1, length: 0 };
+              }
+              quill.insertEmbed(range.index, 'image', base64);
+              quill.setSelection(range.index + 1, 0);
+            } catch (e) {
+              // Fallback: insert at end
+              try {
+                const length = quill.getLength();
+                quill.insertEmbed(length - 1, 'image', base64);
+              } catch (err) {
+                console.error('Failed to insert image:', err);
+              }
+            }
           }
           // Also add to attachments list
           setAttachments(prev => [...prev, base64]);
@@ -435,6 +473,57 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
               control={control}
               render={({ field }) => (
                 <ReactQuill
+                  ref={(el) => {
+                    if (el) {
+                      quillRef.current = el;
+                      // Fix selection range issues on mount
+                      const quill = (el as any).getEditor();
+                      if (quill) {
+                        // Handle paste events properly
+                        quill.root.addEventListener('paste', (e: ClipboardEvent) => {
+                          e.preventDefault();
+                          const clipboardData = e.clipboardData;
+                          if (clipboardData) {
+                            const text = clipboardData.getData('text/plain');
+                            const html = clipboardData.getData('text/html');
+                            
+                            // Get current selection
+                            let range = quill.getSelection(true);
+                            if (!range) {
+                              const length = quill.getLength();
+                              range = { index: length - 1, length: 0 };
+                            }
+                            
+                            // Insert pasted content
+                            if (html) {
+                              const delta = quill.clipboard.convert(html);
+                              quill.updateContents(delta, 'user');
+                            } else if (text) {
+                              quill.insertText(range.index, text, 'user');
+                              quill.setSelection(range.index + text.length, 0);
+                            }
+                          }
+                        });
+                        
+                        // Fix selection after text changes
+                        quill.on('text-change', () => {
+                          setTimeout(() => {
+                            try {
+                              const selection = quill.getSelection();
+                              if (!selection) {
+                                const length = quill.getLength();
+                                if (length > 1) {
+                                  quill.setSelection(length - 1, 0);
+                                }
+                              }
+                            } catch (e) {
+                              // Ignore selection errors - this is the addRange error
+                            }
+                          }, 0);
+                        });
+                      }
+                    }
+                  }}
                   theme="snow"
                   modules={quillModules}
                   value={field.value || ''}
