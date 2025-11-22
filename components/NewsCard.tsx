@@ -18,6 +18,7 @@ export default function NewsCard({ news }: NewsCardProps) {
         {news.urlToImage && (
           <div className="h-48 bg-gray-200 overflow-hidden relative">
             <ImageWithFallback
+              key={`news-${news.id}-${news.urlToImage}`}
               src={news.urlToImage}
               alt={news.title}
               fill

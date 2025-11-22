@@ -45,6 +45,7 @@ export default function NewsSection({ trendingNews }: NewsSectionProps) {
               {featuredNews.urlToImage && (
                 <div className="md:w-1/2 h-64 md:h-auto bg-gray-200 overflow-hidden relative">
                   <ImageWithFallback
+                    key={`featured-${featuredNews.id}-${featuredNews.urlToImage}`}
                     src={featuredNews.urlToImage}
                     alt={featuredNews.title}
                     fill

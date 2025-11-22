@@ -24,6 +24,8 @@ export async function GET(request: NextRequest) {
         'Referer': decodedUrl,
         'Accept': 'image/*,*/*;q=0.8',
       },
+      // Don't cache the fetch to ensure we get fresh images
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -34,17 +36,23 @@ export async function GET(request: NextRequest) {
     const imageBuffer = await response.arrayBuffer();
     const contentType = response.headers.get('content-type') || 'image/jpeg';
 
-    // Return the image with appropriate headers
+    // Return the image with cache headers that include the URL hash for uniqueness
+    // This ensures each unique URL gets its own cached version
+    const urlHash = Buffer.from(decodedUrl).toString('base64').substring(0, 16);
+    
     return new NextResponse(imageBuffer, {
       status: 200,
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable',
+        // Cache based on the actual image URL, not the proxy URL
+        'Cache-Control': `public, max-age=86400, s-maxage=86400`,
+        'ETag': `"${urlHash}"`,
         'Access-Control-Allow-Origin': '*',
+        'Vary': 'Accept',
       },
     });
   } catch (error: any) {
-    console.error('Image proxy error:', error.message);
+    console.error('Image proxy error:', error.message, 'URL:', imageUrl);
     return NextResponse.json(
       { error: 'Failed to proxy image' },
       { status: 500 }

@@ -27,13 +27,14 @@ function isExternalUrl(url: string): boolean {
 }
 
 // Get proxied URL for external images
-function getImageUrl(url: string): string {
+function getImageUrl(url: string, uniqueKey?: string): string {
   if (typeof window === 'undefined') {
     return url; // Server-side, return as-is
   }
   if (isExternalUrl(url)) {
-    // Use our simple proxy API
-    return `/api/image?url=${encodeURIComponent(url)}`;
+    // Use our simple proxy API with unique key to prevent caching issues
+    const cacheKey = uniqueKey || Math.random().toString(36).substring(7);
+    return `/api/image?url=${encodeURIComponent(url)}&key=${cacheKey}`;
   }
   return url;
 }
@@ -48,10 +49,12 @@ export default function ImageWithFallback({
   const [hasError, setHasError] = useState(false);
   const [imgSrc, setImgSrc] = useState(src || '');
 
-  // Update imgSrc when src prop changes
+  // Update imgSrc when src prop changes - use src as unique key
   useEffect(() => {
     if (src && src.trim() !== '' && src !== 'null' && src !== 'undefined') {
-      const proxiedUrl = getImageUrl(src);
+      // Use the src URL itself as part of the unique key to ensure each image is unique
+      const uniqueKey = src.substring(0, 50).replace(/[^a-zA-Z0-9]/g, '');
+      const proxiedUrl = getImageUrl(src, uniqueKey);
       setImgSrc(proxiedUrl);
       setHasError(false);
     }
@@ -73,9 +76,11 @@ export default function ImageWithFallback({
   };
 
   // Simple img tag - use proxied URL for external images to bypass CORS
+  // Add key prop to force React to treat each image as unique
   if (fill) {
     return (
       <img
+        key={src} // Force React to create new img element for each unique src
         src={hasError ? fallbackSrc : imgSrc}
         alt={alt}
         className={`absolute inset-0 w-full h-full object-cover ${className}`}
@@ -87,6 +92,7 @@ export default function ImageWithFallback({
 
   return (
     <img
+      key={src} // Force React to create new img element for each unique src
       src={hasError ? fallbackSrc : imgSrc}
       alt={alt}
       className={`w-full h-full object-cover ${className}`}

@@ -148,6 +148,12 @@ export async function fetchTrendingNews(): Promise<NewsArticle[]> {
       if (process.env.NODE_ENV === 'development') {
         const articlesWithImages = articlesWithFullContent.filter(a => a.urlToImage).length;
         console.log(`Successfully fetched ${articlesWithFullContent.length} news articles (${articlesWithImages} with images)`);
+        // Log unique image URLs to debug
+        const imageUrls = articlesWithFullContent
+          .filter(a => a.urlToImage)
+          .map(a => a.urlToImage)
+          .slice(0, 3);
+        console.log('Sample image URLs:', imageUrls);
       }
 
       return articlesWithFullContent;
