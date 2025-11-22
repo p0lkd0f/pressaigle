@@ -51,18 +51,31 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
   // Initialize turndown for HTML to Markdown conversion (client-side only)
   useEffect(() => {
     if (typeof window !== 'undefined' && !turndownServiceRef.current) {
-      import('turndown').then((TurndownModule) => {
-        import('turndown-plugin-gfm').then((gfmModule) => {
-          const TurndownService = TurndownModule.default;
+      import('turndown').then((TurndownModule: any) => {
+        import('turndown-plugin-gfm').then((gfmModule: any) => {
+          const TurndownService = TurndownModule.default || TurndownModule;
           const { gfm } = gfmModule;
           
           const service = new TurndownService({
             headingStyle: 'atx',
             codeBlockStyle: 'fenced',
           });
-          service.use(gfm);
+          if (gfm) {
+            service.use(gfm);
+          }
+          turndownServiceRef.current = service;
+        }).catch(() => {
+          // If gfm plugin fails, continue without it
+          const TurndownService = TurndownModule.default || TurndownModule;
+          const service = new TurndownService({
+            headingStyle: 'atx',
+            codeBlockStyle: 'fenced',
+          });
           turndownServiceRef.current = service;
         });
+      }).catch(() => {
+        // If turndown fails to load, just continue without it
+        console.warn('Turndown service not available');
       });
     }
   }, []);
