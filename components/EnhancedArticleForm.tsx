@@ -98,7 +98,11 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
         if (article.content && article.content.includes('<')) {
           const turndownService = getTurndownService();
           if (turndownService) {
-            setMarkdownContent(turndownService.turndown(article.content));
+            try {
+              setMarkdownContent(turndownService.turndown(article.content));
+            } catch {
+              setMarkdownContent(article.content);
+            }
           } else {
             setMarkdownContent(article.content);
           }
@@ -204,7 +208,11 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
     try {
       const turndownService = getTurndownService();
       if (turndownService) {
-        setMarkdownContent(turndownService.turndown(value));
+        try {
+          setMarkdownContent(turndownService.turndown(value));
+        } catch {
+          // If conversion fails, keep markdown as is
+        }
       }
     } catch (e) {
       // If conversion fails, keep markdown as is
@@ -226,7 +234,11 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
     try {
       const turndownService = getTurndownService();
       if (turndownService) {
-        setMarkdownContent(turndownService.turndown(value));
+        try {
+          setMarkdownContent(turndownService.turndown(value));
+        } catch {
+          setMarkdownContent(value);
+        }
       } else {
         setMarkdownContent(value);
       }
