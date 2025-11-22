@@ -150,6 +150,74 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
     };
   }, []);
 
+  // Setup Quill instance and paste handler when editor mode is rich
+  useEffect(() => {
+    if (editorMode !== 'rich') return;
+
+    const setupQuill = () => {
+      const quillEditor = document.querySelector('.ql-editor') as any;
+      if (quillEditor && quillEditor.__quill) {
+        const quill = quillEditor.__quill;
+        quillRef.current = { getEditor: () => quill };
+        
+        // Handle paste events properly (only set up once)
+        if (!quill._pasteHandlerSet) {
+          quill.root.addEventListener('paste', (e: ClipboardEvent) => {
+            e.preventDefault();
+            const clipboardData = e.clipboardData;
+            if (clipboardData) {
+              const text = clipboardData.getData('text/plain');
+              const html = clipboardData.getData('text/html');
+              
+              // Get current selection
+              let range = quill.getSelection(true);
+              if (!range) {
+                const length = quill.getLength();
+                range = { index: length - 1, length: 0 };
+              }
+              
+              // Insert pasted content
+              if (html) {
+                const delta = quill.clipboard.convert(html);
+                quill.updateContents(delta, 'user');
+              } else if (text) {
+                quill.insertText(range.index, text, 'user');
+                quill.setSelection(range.index + text.length, 0);
+              }
+            }
+          });
+          
+          // Fix selection after text changes
+          quill.on('text-change', () => {
+            setTimeout(() => {
+              try {
+                const selection = quill.getSelection();
+                if (!selection) {
+                  const length = quill.getLength();
+                  if (length > 1) {
+                    quill.setSelection(length - 1, 0);
+                  }
+                }
+              } catch (e) {
+                // Ignore selection errors - this is the addRange error
+              }
+            }, 0);
+          });
+          
+          quill._pasteHandlerSet = true;
+        }
+      }
+    };
+    
+    // Try to setup immediately
+    setupQuill();
+    
+    // Also try after a short delay in case Quill isn't ready yet
+    const timeout = setTimeout(setupQuill, 100);
+    
+    return () => clearTimeout(timeout);
+  }, [editorMode, contentValue]);
+
   const quillModules = {
     toolbar: {
       container: [
@@ -175,7 +243,7 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
     },
   };
 
-  const quillRef = useRef<any>(null);
+  const quillRef = useRef<{ getEditor: () => any } | null>(null);
 
   function imageHandler() {
     const input = document.createElement('input');
@@ -473,57 +541,6 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
               control={control}
               render={({ field }) => (
                 <ReactQuill
-                  ref={(el) => {
-                    if (el) {
-                      quillRef.current = el;
-                      // Fix selection range issues on mount
-                      const quill = (el as any).getEditor();
-                      if (quill) {
-                        // Handle paste events properly
-                        quill.root.addEventListener('paste', (e: ClipboardEvent) => {
-                          e.preventDefault();
-                          const clipboardData = e.clipboardData;
-                          if (clipboardData) {
-                            const text = clipboardData.getData('text/plain');
-                            const html = clipboardData.getData('text/html');
-                            
-                            // Get current selection
-                            let range = quill.getSelection(true);
-                            if (!range) {
-                              const length = quill.getLength();
-                              range = { index: length - 1, length: 0 };
-                            }
-                            
-                            // Insert pasted content
-                            if (html) {
-                              const delta = quill.clipboard.convert(html);
-                              quill.updateContents(delta, 'user');
-                            } else if (text) {
-                              quill.insertText(range.index, text, 'user');
-                              quill.setSelection(range.index + text.length, 0);
-                            }
-                          }
-                        });
-                        
-                        // Fix selection after text changes
-                        quill.on('text-change', () => {
-                          setTimeout(() => {
-                            try {
-                              const selection = quill.getSelection();
-                              if (!selection) {
-                                const length = quill.getLength();
-                                if (length > 1) {
-                                  quill.setSelection(length - 1, 0);
-                                }
-                              }
-                            } catch (e) {
-                              // Ignore selection errors - this is the addRange error
-                            }
-                          }, 0);
-                        });
-                      }
-                    }
-                  }}
                   theme="snow"
                   modules={quillModules}
                   value={field.value || ''}
