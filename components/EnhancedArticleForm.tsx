@@ -6,8 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import dynamic from 'next/dynamic';
 import { Article } from '@/lib/articles';
-import TurndownService from 'turndown';
-import { gfm } from 'turndown-plugin-gfm';
 
 // Dynamically import ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
@@ -48,13 +46,30 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
   });
 
   const contentValue = watch('content');
+  const turndownServiceRef = useRef<any>(null);
 
-  // Initialize turndown for HTML to Markdown conversion
-  const turndownService = new TurndownService({
-    headingStyle: 'atx',
-    codeBlockStyle: 'fenced',
-  });
-  turndownService.use(gfm);
+  // Initialize turndown for HTML to Markdown conversion (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !turndownServiceRef.current) {
+      import('turndown').then((TurndownModule) => {
+        import('turndown-plugin-gfm').then((gfmModule) => {
+          const TurndownService = TurndownModule.default;
+          const { gfm } = gfmModule;
+          
+          const service = new TurndownService({
+            headingStyle: 'atx',
+            codeBlockStyle: 'fenced',
+          });
+          service.use(gfm);
+          turndownServiceRef.current = service;
+        });
+      });
+    }
+  }, []);
+
+  const getTurndownService = () => {
+    return turndownServiceRef.current;
+  };
 
   useEffect(() => {
     if (article) {
@@ -68,7 +83,12 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
       // Try to convert HTML to markdown
       try {
         if (article.content && article.content.includes('<')) {
-          setMarkdownContent(turndownService.turndown(article.content));
+          const turndownService = getTurndownService();
+          if (turndownService) {
+            setMarkdownContent(turndownService.turndown(article.content));
+          } else {
+            setMarkdownContent(article.content);
+          }
         } else {
           setMarkdownContent(article.content);
         }
@@ -169,7 +189,10 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
     setHtmlContent(value);
     // Convert HTML to markdown for markdown view
     try {
-      setMarkdownContent(turndownService.turndown(value));
+      const turndownService = getTurndownService();
+      if (turndownService) {
+        setMarkdownContent(turndownService.turndown(value));
+      }
     } catch (e) {
       // If conversion fails, keep markdown as is
     }
@@ -188,7 +211,12 @@ export default function EnhancedArticleForm({ article, onSave, onCancel }: Enhan
     setHtmlContent(value);
     setValue('content', value);
     try {
-      setMarkdownContent(turndownService.turndown(value));
+      const turndownService = getTurndownService();
+      if (turndownService) {
+        setMarkdownContent(turndownService.turndown(value));
+      } else {
+        setMarkdownContent(value);
+      }
     } catch (e) {
       setMarkdownContent(value);
     }
