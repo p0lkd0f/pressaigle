@@ -27,14 +27,27 @@ function isExternalUrl(url: string): boolean {
 }
 
 // Get proxied URL for external images
-function getImageUrl(url: string, uniqueKey?: string): string {
+function getImageUrl(url: string): string {
   if (typeof window === 'undefined') {
     return url; // Server-side, return as-is
   }
   if (isExternalUrl(url)) {
-    // Use our simple proxy API with unique key to prevent caching issues
-    const cacheKey = uniqueKey || Math.random().toString(36).substring(7);
-    return `/api/image?url=${encodeURIComponent(url)}&key=${cacheKey}`;
+    // Use our simple proxy API
+    // Create a hash from the URL to ensure each unique URL gets a unique proxy path
+    // This prevents browser from caching the same image for different URLs
+    let urlHash = '';
+    try {
+      // Create a simple hash from the URL
+      for (let i = 0; i < url.length && i < 50; i++) {
+        const char = url.charCodeAt(i);
+        urlHash += char.toString(36);
+      }
+      urlHash = urlHash.substring(0, 30);
+    } catch {
+      // Fallback: use URL substring
+      urlHash = url.substring(0, 50).replace(/[^a-zA-Z0-9]/g, '');
+    }
+    return `/api/image?url=${encodeURIComponent(url)}&id=${urlHash}`;
   }
   return url;
 }
@@ -49,14 +62,14 @@ export default function ImageWithFallback({
   const [hasError, setHasError] = useState(false);
   const [imgSrc, setImgSrc] = useState(src || '');
 
-  // Update imgSrc when src prop changes - use src as unique key
+  // Update imgSrc when src prop changes
   useEffect(() => {
     if (src && src.trim() !== '' && src !== 'null' && src !== 'undefined') {
-      // Use the src URL itself as part of the unique key to ensure each image is unique
-      const uniqueKey = src.substring(0, 50).replace(/[^a-zA-Z0-9]/g, '');
-      const proxiedUrl = getImageUrl(src, uniqueKey);
+      const proxiedUrl = getImageUrl(src);
       setImgSrc(proxiedUrl);
       setHasError(false);
+    } else {
+      setImgSrc('');
     }
   }, [src]);
 

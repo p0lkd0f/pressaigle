@@ -160,12 +160,19 @@ export async function fetchTrendingNews(page: number = 1, pageSize: number = 20)
         const endIdx = startIdx + pageSize;
         console.log(`Page ${page}: Showing ${articlesWithFullContent.length} articles (${articlesWithImages} with images) from ${allFilteredArticles.length} total available`);
         console.log(`Total results from API: ${totalResults}, Range: ${startIdx + 1}-${Math.min(endIdx, allFilteredArticles.length)} of ${allFilteredArticles.length}`);
-        // Log unique image URLs to debug
+        // Log ALL image URLs to verify uniqueness
         const imageUrls = articlesWithFullContent
           .filter(a => a.urlToImage)
-          .map(a => a.urlToImage)
-          .slice(0, 3);
-        console.log('Sample image URLs:', imageUrls);
+          .map(a => ({ title: a.title.substring(0, 40), image: a.urlToImage?.substring(0, 80) }));
+        console.log('All image URLs for this page:');
+        imageUrls.forEach((item, idx) => {
+          console.log(`  ${idx + 1}. ${item.title}: ${item.image}`);
+        });
+        // Check for duplicates
+        const uniqueImages = new Set(articlesWithFullContent.filter(a => a.urlToImage).map(a => a.urlToImage));
+        if (uniqueImages.size < articlesWithImages) {
+          console.warn(`⚠️ WARNING: Found duplicate image URLs! ${articlesWithImages} articles but only ${uniqueImages.size} unique images`);
+        }
       }
 
       return articlesWithFullContent;

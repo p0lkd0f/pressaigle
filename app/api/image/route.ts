@@ -36,23 +36,23 @@ export async function GET(request: NextRequest) {
     const imageBuffer = await response.arrayBuffer();
     const contentType = response.headers.get('content-type') || 'image/jpeg';
 
-    // Return the image with cache headers that include the URL hash for uniqueness
+    // Create a unique ETag based on the actual image URL
     // This ensures each unique URL gets its own cached version
-    const urlHash = Buffer.from(decodedUrl).toString('base64').substring(0, 16);
+    const urlHash = Buffer.from(decodedUrl).toString('base64').substring(0, 20).replace(/[^a-zA-Z0-9]/g, '');
     
     return new NextResponse(imageBuffer, {
       status: 200,
       headers: {
         'Content-Type': contentType,
-        // Cache based on the actual image URL, not the proxy URL
+        // Cache with unique ETag per URL
         'Cache-Control': `public, max-age=86400, s-maxage=86400`,
-        'ETag': `"${urlHash}"`,
+        'ETag': `"img-${urlHash}"`,
         'Access-Control-Allow-Origin': '*',
-        'Vary': 'Accept',
+        'Vary': 'Accept, Origin',
       },
     });
   } catch (error: any) {
-    console.error('Image proxy error:', error.message, 'URL:', imageUrl);
+    console.error('Image proxy error:', error.message, 'URL:', imageUrl?.substring(0, 100));
     return NextResponse.json(
       { error: 'Failed to proxy image' },
       { status: 500 }
