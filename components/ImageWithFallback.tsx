@@ -10,6 +10,34 @@ interface ImageWithFallbackProps {
   priority?: boolean;
 }
 
+// Check if URL is external (needs proxy)
+function isExternalUrl(url: string): boolean {
+  if (!url || url.startsWith('/') || url.startsWith('data:') || url.startsWith('blob:')) {
+    return false;
+  }
+  try {
+    if (typeof window !== 'undefined') {
+      const urlObj = new URL(url);
+      return urlObj.origin !== window.location.origin;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
+// Get proxied URL for external images
+function getImageUrl(url: string): string {
+  if (typeof window === 'undefined') {
+    return url; // Server-side, return as-is
+  }
+  if (isExternalUrl(url)) {
+    // Use our simple proxy API
+    return `/api/image?url=${encodeURIComponent(url)}`;
+  }
+  return url;
+}
+
 export default function ImageWithFallback({
   src,
   alt,
@@ -23,7 +51,8 @@ export default function ImageWithFallback({
   // Update imgSrc when src prop changes
   useEffect(() => {
     if (src && src.trim() !== '' && src !== 'null' && src !== 'undefined') {
-      setImgSrc(src);
+      const proxiedUrl = getImageUrl(src);
+      setImgSrc(proxiedUrl);
       setHasError(false);
     }
   }, [src]);
@@ -43,9 +72,7 @@ export default function ImageWithFallback({
     }
   };
 
-  // Use regular img tag with CORS-friendly attributes for direct fetching
-  // crossOrigin="anonymous" allows CORS requests
-  // referrerPolicy="no-referrer" prevents referrer from being sent (may help with some restrictions)
+  // Simple img tag - use proxied URL for external images to bypass CORS
   if (fill) {
     return (
       <img
@@ -54,8 +81,6 @@ export default function ImageWithFallback({
         className={`absolute inset-0 w-full h-full object-cover ${className}`}
         onError={handleError}
         loading={priority ? 'eager' : 'lazy'}
-        crossOrigin="anonymous"
-        referrerPolicy="no-referrer"
       />
     );
   }
@@ -67,8 +92,6 @@ export default function ImageWithFallback({
       className={`w-full h-full object-cover ${className}`}
       onError={handleError}
       loading={priority ? 'eager' : 'lazy'}
-      crossOrigin="anonymous"
-      referrerPolicy="no-referrer"
     />
   );
 }

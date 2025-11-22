@@ -77,7 +77,7 @@ export default async function NewsPage({ params }: { params: Promise<{ id: strin
           <div className="p-8 md:p-12">
             <div className="flex items-center mb-6 pb-6 border-b border-gray-200">
               <div className="flex-1">
-                <span className="inline-block bg-primary-100 text-primary-700 text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">
+                <span className="inline-block bg-primary-100 text-primary-600 text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">
                   {news.source}
                 </span>
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
@@ -95,7 +95,7 @@ export default async function NewsPage({ params }: { params: Promise<{ id: strin
             <div className="text-gray-700 leading-relaxed">
               {/* Show description as a lead/intro if we have full content */}
               {news.description && fullContent && fullContent.length > 500 && fullContent !== news.description && (
-                <div className="mb-8 p-6 bg-primary-50 rounded-lg border-l-4 border-primary-600">
+                <div className="mb-8 p-6 bg-primary-50 rounded-lg border-l-4 border-primary-500">
                   <p className="text-xl font-semibold text-gray-800 leading-relaxed">
                     {news.description}
                   </p>

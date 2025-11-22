@@ -53,13 +53,13 @@ body {
 }
 
 .prose a {
-  color: #f59e0b;
+  color: #7a5d91;
   text-decoration: underline;
   transition: color 0.2s;
 }
 
 .prose a:hover {
-  color: #d97706;
+  color: #6a4d7f;
 }
 
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
@@ -79,7 +79,7 @@ body {
 }
 
 .prose blockquote {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid #8b6fa3;
   padding-left: 1rem;
   margin: 1.5rem 0;
   font-style: italic;
@@ -179,10 +179,10 @@ body {
 }
 
 .ql-snow .ql-tooltip a {
-  color: #f59e0b;
+  color: #7a5d91;
 }
 
 .ql-snow .ql-tooltip a:hover {
-  color: #d97706;
+  color: #6a4d7f;
 }
 

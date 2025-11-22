@@ -41,7 +41,7 @@ export default function NewsSection({ trendingNews }: NewsSectionProps) {
               )}
               <div className={`p-8 ${featuredNews.urlToImage ? 'md:w-1/2' : 'w-full'}`}>
                 <div className="flex items-center mb-3">
-                  <span className="bg-primary-600 text-white text-xs font-bold px-3 py-1 rounded-full mr-3">
+                  <span className="bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-full mr-3">
                     FEATURED
                   </span>
                   <span className="text-sm text-gray-600">{featuredNews.source}</span>
@@ -56,7 +56,7 @@ export default function NewsSection({ trendingNews }: NewsSectionProps) {
                   <span className="text-sm text-gray-500">
                     {format(new Date(featuredNews.publishedAt), 'MMMM dd, yyyy')}
                   </span>
-                  <span className="inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold transition-colors">
+                  <span className="inline-flex items-center text-primary-600 hover:text-primary-500 font-semibold transition-colors">
                     Read article
                     <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -88,7 +88,7 @@ export default function NewsSection({ trendingNews }: NewsSectionProps) {
                   )}
                   <div className="p-6 flex-grow flex flex-col">
                     <div className="flex items-center mb-3">
-                      <span className="text-xs font-semibold text-primary-600 uppercase tracking-wide">
+                      <span className="text-xs font-semibold text-primary-500 uppercase tracking-wide">
                         {news.source}
                       </span>
                       <span className="mx-2 text-gray-300">•</span>

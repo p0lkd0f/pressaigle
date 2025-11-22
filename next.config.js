@@ -11,6 +11,10 @@ const nextConfig = {
         protocol: 'http',
         hostname: '**',
       },
+      {
+        protocol: 'https',
+        hostname: 'dynamic.design.com',
+      },
     ],
     unoptimized: false,
   },

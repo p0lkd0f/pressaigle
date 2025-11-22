@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ArticleCard from '@/components/ArticleCard';
@@ -25,13 +26,22 @@ export default async function Home() {
       <main className="flex-grow container mx-auto px-4 py-12 max-w-7xl">
         {/* Hero Section */}
         <section className="text-center mb-20">
-          <div className="mb-6">
-            <span className="text-6xl font-bold">🦅</span>
+          <div className="mb-6 flex justify-center">
+            <div className="relative w-24 h-24">
+              <Image
+                src="https://dynamic.design.com/asset/logo/f68772ce-9b9b-4105-bf43-73a47ca59d93/logo-search-grid-2x"
+                alt="Moi l'aigle Logo"
+                fill
+                className="object-contain"
+                priority
+                unoptimized
+              />
+            </div>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
+          <h1 className="text-5xl md:text-6xl font-bold text-primary-800 mb-6 leading-tight tracking-tight">
             Moi l'aigle
           </h1>
-          <div className="w-24 h-1 bg-primary-600 mx-auto mb-6"></div>
+          <div className="w-24 h-1 bg-primary-500 mx-auto mb-6"></div>
           <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-light">
             Your trusted source for curated articles and breaking news. 
             Stay informed with quality content that matters.
