@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-end-rgb));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Enhanced prose styling for markdown and HTML content */
+.prose {
+  color: #374151;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.prose a {
+  color: #f59e0b;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.prose a:hover {
+  color: #d97706;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #111827;
+}
+
+.prose ul, .prose ol {
+  margin: 1.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin: 0.5rem 0;
+}
+
+.prose blockquote {
+  border-left: 4px solid #f59e0b;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.prose code {
+  background-color: #f3f4f6;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.prose pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+/* React Quill Editor Styles */
+.quill {
+  background: white;
+}
+
+.ql-container {
+  font-size: 16px;
+  font-family: inherit;
+  min-height: 400px;
+}
+
+.ql-editor {
+  min-height: 400px;
+  padding: 20px;
+}
+
+.ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+.ql-toolbar {
+  border-top: 2px solid #e5e7eb;
+  border-left: 2px solid #e5e7eb;
+  border-right: 2px solid #e5e7eb;
+  border-bottom: none;
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 8px 8px 0 0;
+}
+
+.ql-container {
+  border-bottom: 2px solid #e5e7eb;
+  border-left: 2px solid #e5e7eb;
+  border-right: 2px solid #e5e7eb;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.ql-snow .ql-stroke {
+  stroke: #374151;
+}
+
+.ql-snow .ql-fill {
+  fill: #374151;
+}
+
+.ql-snow .ql-picker-label {
+  color: #374151;
+}
+
+.ql-snow .ql-picker-options {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.ql-snow .ql-tooltip {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.ql-snow .ql-tooltip input {
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+}
+
+.ql-snow .ql-tooltip a {
+  color: #f59e0b;
+}
+
+.ql-snow .ql-tooltip a:hover {
+  color: #d97706;
+}
+
