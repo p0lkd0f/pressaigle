@@ -19,11 +19,11 @@ export default async function NewsPage({ params }: { params: Promise<{ id: strin
   setNewsCache(trendingNews);
   
   // Get the specific news article
-  let news = getNewsById(id);
+  let news: NewsArticle | null = getNewsById(id);
   
   // If still not found, try searching in the fresh data
   if (!news) {
-    news = trendingNews.find(n => n.id === id);
+    news = trendingNews.find(n => n.id === id) || null;
   }
 
   if (!news) {
