@@ -8,8 +8,10 @@ import dynamic from 'next/dynamic';
 import { Article } from '@/lib/articles';
 
 // Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-import 'react-quill/dist/quill.snow.css';
+const ReactQuill = dynamic(() => import('react-quill'), { 
+  ssr: false,
+  loading: () => <div className="h-96 border-2 border-gray-200 rounded-lg flex items-center justify-center bg-gray-50">Loading editor...</div>
+});
 
 const articleSchema = z.object({
   title: z.string().min(1, 'Title is required'),

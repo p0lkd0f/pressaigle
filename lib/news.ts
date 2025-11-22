@@ -103,7 +103,7 @@ export async function fetchTrendingNews(): Promise<NewsArticle[]> {
 
       // Now fetch full content for ALL articles in parallel
       const articlesWithFullContent = await Promise.all(
-        articles.map(async (article) => {
+        articles.map(async (article: NewsArticle) => {
           // If content is short or just description, fetch full content
           if (article.url && article.url !== '#' && (!article.content || article.content.length < 1000 || article.content === article.description)) {
             try {
@@ -209,7 +209,7 @@ export async function fetchNewsByCategory(category: string = 'technology', pageS
 
       // Now fetch full content for ALL articles in parallel
       const articlesWithFullContent = await Promise.all(
-        articles.map(async (article) => {
+        articles.map(async (article: NewsArticle) => {
           // If content is short or just description, fetch full content
           if (article.url && article.url !== '#' && (!article.content || article.content.length < 1000 || article.content === article.description)) {
             try {
