@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import EagleLogo from './EagleLogo';
 
 export default function Footer() {
   return (
@@ -7,14 +7,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
             <h3 className="text-2xl font-bold mb-4 flex items-center">
-              <div className="relative w-10 h-10 mr-3">
-                <Image
-                  src="https://dynamic.design.com/asset/logo/f68772ce-9b9b-4105-bf43-73a47ca59d93/logo-search-grid-2x"
-                  alt="Moi l'aigle Logo"
-                  fill
-                  className="object-contain"
-                  unoptimized
-                />
+              <div className="mr-3">
+                <EagleLogo size={40} color="#e8e2f0" />
               </div>
               Moi l'aigle
             </h3>

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import EagleLogo from './EagleLogo';
 
 export default function Header() {
   return (
@@ -7,15 +7,8 @@ export default function Header() {
       <div className="container mx-auto px-4 py-4 max-w-7xl">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative w-12 h-12 group-hover:scale-110 transition-transform">
-              <Image
-                src="https://dynamic.design.com/asset/logo/f68772ce-9b9b-4105-bf43-73a47ca59d93/logo-search-grid-2x"
-                alt="Moi l'aigle Logo"
-                fill
-                className="object-contain"
-                priority
-                unoptimized
-              />
+            <div className="group-hover:scale-110 transition-transform">
+              <EagleLogo size={48} color="#7a5d91" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-primary-800 tracking-tight">Moi l'aigle</h1>
