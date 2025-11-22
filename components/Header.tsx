@@ -21,7 +21,7 @@ export default function Header() {
               Home
             </Link>
             <Link 
-              href="/#articles" 
+              href="/articles" 
               className="text-gray-700 hover:text-primary-600 font-medium transition-colors border-b-2 border-transparent hover:border-primary-600 pb-1"
             >
               Articles

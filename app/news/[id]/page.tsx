@@ -7,17 +7,23 @@ import { getNewsById, fetchTrendingNews, setNewsCache, fetchFullArticleContent }
 import { format } from 'date-fns';
 import Link from 'next/link';
 
+// Always fetch fresh news data
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+
 export default async function NewsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
-  // Try to get from cache first
+  // Always fetch fresh news to ensure we have the latest data
+  const trendingNews = await fetchTrendingNews();
+  setNewsCache(trendingNews);
+  
+  // Get the specific news article
   let news = getNewsById(id);
   
-  // If not in cache, fetch news and try again
+  // If still not found, try searching in the fresh data
   if (!news) {
-    const trendingNews = await fetchTrendingNews();
-    setNewsCache(trendingNews);
-    news = getNewsById(id);
+    news = trendingNews.find(n => n.id === id);
   }
 
   if (!news) {

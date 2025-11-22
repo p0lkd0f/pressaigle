@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ArticleCard from '@/components/ArticleCard';
@@ -5,8 +6,13 @@ import NewsSection from '@/components/NewsSection';
 import { getAllArticles } from '@/lib/articles';
 import { fetchTrendingNews, setNewsCache } from '@/lib/news';
 
+// Force fresh news fetch on every request (no caching)
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const articles = getAllArticles();
+  // Always fetch fresh news from API
   const trendingNews = await fetchTrendingNews();
   
   // Cache news for detail page access
@@ -37,34 +43,38 @@ export default async function Home() {
           <NewsSection trendingNews={trendingNews} />
         </section>
 
-        {/* Articles Section */}
-        <section id="articles" className="mt-16">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-4xl font-bold text-gray-900">Latest Articles</h2>
-            {articles.length > 0 && (
-              <span className="text-sm text-gray-500">
-                {articles.length} {articles.length === 1 ? 'article' : 'articles'}
-              </span>
-            )}
-          </div>
-          {articles.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-xl shadow-sm border-2 border-dashed border-gray-200">
-              <div className="max-w-md mx-auto">
-                <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <p className="text-gray-600 text-lg mb-2">No articles yet</p>
-                <p className="text-gray-500 text-sm">Check back soon for new content!</p>
-              </div>
+        {/* Articles Section - Only show a preview */}
+        {articles.length > 0 && (
+          <section id="articles" className="mt-16">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-4xl font-bold text-gray-900">Latest Articles</h2>
+              <Link 
+                href="/articles"
+                className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+              >
+                View all →
+              </Link>
             </div>
-          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {articles.map((article) => (
+              {articles.slice(0, 3).map((article) => (
                 <ArticleCard key={article.id} article={article} />
               ))}
             </div>
-          )}
-        </section>
+            {articles.length > 3 && (
+              <div className="text-center mt-8">
+                <Link
+                  href="/articles"
+                  className="inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold"
+                >
+                  View all {articles.length} articles
+                  <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            )}
+          </section>
+        )}
       </main>
 
       <Footer />

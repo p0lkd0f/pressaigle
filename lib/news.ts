@@ -35,12 +35,18 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Fetch trending news articles
+// Always fetches fresh data from API (no caching at function level)
 export async function fetchTrendingNews(): Promise<NewsArticle[]> {
   try {
     if (!NEWS_API_KEY || NEWS_API_KEY === 'demo') {
       console.warn('News API key not configured. Using fallback data.');
       const fallback = getFallbackNews();
       return fallback;
+    }
+    
+    // Log API key status in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Fetching fresh news from NewsAPI...');
     }
 
     // Try to get more content using the 'everything' endpoint with popular topics
@@ -100,14 +106,15 @@ export async function fetchTrendingNews(): Promise<NewsArticle[]> {
           
           return {
             id: generateNewsId(title, source, publishedAt),
-            title,
-            description: article.description || 'Read the full article for more details.',
+            title: title.trim(),
+            description: (article.description || 'Read the full article for more details.').trim(),
             url: article.url || '#',
-            urlToImage: article.urlToImage,
+            // Use the actual image URL from API, filter out null/empty values
+            urlToImage: article.urlToImage && article.urlToImage !== 'null' && article.urlToImage.trim() !== '' ? article.urlToImage.trim() : undefined,
             publishedAt,
-            source,
-            content: content,
-            htmlContent: isHtml ? content : undefined,
+            source: source.trim(),
+            content: content.trim(),
+            htmlContent: isHtml ? content.trim() : undefined,
             isHtml: isHtml,
           };
         });
@@ -136,6 +143,12 @@ export async function fetchTrendingNews(): Promise<NewsArticle[]> {
           return article;
         })
       );
+
+      // Log success in development
+      if (process.env.NODE_ENV === 'development') {
+        const articlesWithImages = articlesWithFullContent.filter(a => a.urlToImage).length;
+        console.log(`Successfully fetched ${articlesWithFullContent.length} news articles (${articlesWithImages} with images)`);
+      }
 
       return articlesWithFullContent;
     }
@@ -223,14 +236,15 @@ export async function fetchNewsByCategory(category: string = 'technology', pageS
           
           return {
             id: generateNewsId(title, source, publishedAt),
-            title,
-            description: article.description || 'Read the full article for more details.',
+            title: title.trim(),
+            description: (article.description || 'Read the full article for more details.').trim(),
             url: article.url || '#',
-            urlToImage: article.urlToImage,
+            // Use the actual image URL from API, filter out null/empty values
+            urlToImage: article.urlToImage && article.urlToImage !== 'null' && article.urlToImage.trim() !== '' ? article.urlToImage.trim() : undefined,
             publishedAt,
-            source,
-            content: content,
-            htmlContent: isHtml ? content : undefined,
+            source: source.trim(),
+            content: content.trim(),
+            htmlContent: isHtml ? content.trim() : undefined,
             isHtml: isHtml,
           };
         });
