@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Article } from '@/lib/articles';
+import ImageWithFallback from './ImageWithFallback';
 
 interface ArticleCardProps {
   article: Article;
@@ -11,11 +14,12 @@ export default function ArticleCard({ article }: ArticleCardProps) {
     <Link href={`/articles/${article.id}`}>
       <article className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer h-full flex flex-col hover:-translate-y-1">
         {article.imageUrl && (
-          <div className="h-56 bg-gray-200 overflow-hidden">
-            <img
+          <div className="h-56 bg-gray-200 overflow-hidden relative">
+            <ImageWithFallback
               src={article.imageUrl}
               alt={article.title}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              fill
+              className="hover:scale-105 transition-transform duration-300"
             />
           </div>
         )}

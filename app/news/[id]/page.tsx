@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ContentRenderer from '@/components/ContentRenderer';
+import ImageWithFallback from '@/components/ImageWithFallback';
 import { getNewsById, fetchTrendingNews, setNewsCache, fetchFullArticleContent } from '@/lib/news';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -29,9 +30,14 @@ export default async function NewsPage({ params }: { params: Promise<{ id: strin
   
   // Only fetch if content is still very short (fallback case)
   if (news.url && news.url !== '#' && (!fullContent || fullContent.length < 300)) {
-    const fetchedContent = await fetchFullArticleContent(news.url);
-    if (fetchedContent && fetchedContent.length > 200) {
-      fullContent = fetchedContent;
+    try {
+      const fetchedContent = await fetchFullArticleContent(news.url);
+      if (fetchedContent && fetchedContent.length > 200) {
+        fullContent = fetchedContent;
+      }
+    } catch (error) {
+      // If fetching fails, use existing content
+      console.debug('Failed to fetch additional content');
     }
   }
 
@@ -52,11 +58,12 @@ export default async function NewsPage({ params }: { params: Promise<{ id: strin
 
         <article className="bg-white rounded-xl shadow-lg overflow-hidden">
           {news.urlToImage && (
-            <div className="w-full h-96 bg-gray-200 overflow-hidden">
-              <img
+            <div className="w-full h-96 bg-gray-200 overflow-hidden relative">
+              <ImageWithFallback
                 src={news.urlToImage}
                 alt={news.title}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
           )}

@@ -25,7 +25,14 @@ function generateNewsId(title: string, source: string, publishedAt: string): str
 }
 
 // Get NewsAPI key from environment variables
+// On Vercel, use NEXT_PUBLIC_NEWS_API_KEY for client-side access if needed
+// For server-side, NEWS_API_KEY is preferred
 const NEWS_API_KEY = process.env.NEWS_API_KEY || process.env.NEXT_PUBLIC_NEWS_API_KEY;
+
+// Log API key status (without exposing the key)
+if (process.env.NODE_ENV === 'development') {
+  console.log('News API Key configured:', !!NEWS_API_KEY && NEWS_API_KEY !== 'demo');
+}
 
 // Fetch trending news articles
 export async function fetchTrendingNews(): Promise<NewsArticle[]> {
@@ -44,6 +51,10 @@ export async function fetchTrendingNews(): Promise<NewsArticle[]> {
         language: 'en',
         pageSize: 6,
         apiKey: NEWS_API_KEY,
+      },
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Moi-laigle-blog/1.0',
       },
     });
     
@@ -129,9 +140,22 @@ export async function fetchTrendingNews(): Promise<NewsArticle[]> {
       return articlesWithFullContent;
     }
   } catch (error: any) {
-    console.error('Error fetching trending news:', error.response?.data || error.message);
+    // Log error details for debugging
+    if (error.response) {
+      console.error('NewsAPI Error:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      });
+    } else if (error.request) {
+      console.error('NewsAPI Request Error: No response received', error.message);
+    } else {
+      console.error('NewsAPI Error:', error.message);
+    }
   }
   
+  // Always return fallback news if API fails
+  console.warn('Using fallback news data');
   return getFallbackNews();
 }
 
@@ -150,6 +174,10 @@ export async function fetchNewsByCategory(category: string = 'technology', pageS
         language: 'en',
         pageSize: pageSize,
         apiKey: NEWS_API_KEY,
+      },
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Moi-laigle-blog/1.0',
       },
     });
     
@@ -235,9 +263,22 @@ export async function fetchNewsByCategory(category: string = 'technology', pageS
       return articlesWithFullContent;
     }
   } catch (error: any) {
-    console.error(`Error fetching ${category} news:`, error.response?.data || error.message);
+    // Log error details for debugging
+    if (error.response) {
+      console.error(`NewsAPI Error (${category}):`, {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      });
+    } else if (error.request) {
+      console.error(`NewsAPI Request Error (${category}): No response received`, error.message);
+    } else {
+      console.error(`NewsAPI Error (${category}):`, error.message);
+    }
   }
   
+  // Always return fallback news if API fails
+  console.warn(`Using fallback news data for ${category}`);
   return getFallbackNewsByCategory(category);
 }
 

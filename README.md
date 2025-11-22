@@ -30,12 +30,24 @@ npm install
 ```
 
 2. Set up environment variables:
-   - Copy `.env.example` to `.env` (if it exists) or create a new `.env` file
+   - Create a `.env` file in the root directory
    - Add your NewsAPI key:
    ```
    NEWS_API_KEY=your_news_api_key_here
    ```
    - Get a free API key from [NewsAPI](https://newsapi.org/) (free tier available)
+
+### Vercel Deployment
+
+1. **Push your code to GitHub**
+2. **Import your repository to Vercel**
+3. **Add Environment Variables in Vercel:**
+   - Go to your project settings → Environment Variables
+   - Add `NEWS_API_KEY` with your NewsAPI key value
+   - Make sure to add it for **Production**, **Preview**, and **Development** environments
+4. **Redeploy** your application
+
+**Important:** Without the `NEWS_API_KEY` environment variable set in Vercel, the news API will not work and you'll only see fallback news articles.
 
 3. Run the development server:
 ```bash

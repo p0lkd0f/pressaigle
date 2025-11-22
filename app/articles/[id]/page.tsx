@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ContentRenderer from '@/components/ContentRenderer';
+import ImageWithFallback from '@/components/ImageWithFallback';
 import { getArticleById } from '@/lib/articles';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -31,11 +32,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
         <article className="bg-white rounded-xl shadow-lg overflow-hidden">
           {article.imageUrl && (
-            <div className="w-full h-96 bg-gray-200 overflow-hidden">
-              <img
+            <div className="w-full h-96 bg-gray-200 overflow-hidden relative">
+              <ImageWithFallback
                 src={article.imageUrl}
                 alt={article.title}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
           )}

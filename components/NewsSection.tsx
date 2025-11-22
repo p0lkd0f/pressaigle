@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import { NewsArticle } from '@/lib/news';
 import { format } from 'date-fns';
+import ImageWithFallback from './ImageWithFallback';
 
 interface NewsSectionProps {
   trendingNews: NewsArticle[];
@@ -27,11 +30,12 @@ export default function NewsSection({ trendingNews }: NewsSectionProps) {
           <div className="mb-8 bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer">
             <div className="md:flex">
               {featuredNews.urlToImage && (
-                <div className="md:w-1/2 h-64 md:h-auto bg-gray-200 overflow-hidden">
-                  <img
+                <div className="md:w-1/2 h-64 md:h-auto bg-gray-200 overflow-hidden relative">
+                  <ImageWithFallback
                     src={featuredNews.urlToImage}
                     alt={featuredNews.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    fill
+                    className="hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               )}
@@ -73,11 +77,12 @@ export default function NewsSection({ trendingNews }: NewsSectionProps) {
               <Link key={news.id} href={`/news/${news.id}`}>
                 <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full flex flex-col">
                   {news.urlToImage && (
-                    <div className="h-48 bg-gray-200 overflow-hidden">
-                      <img
+                    <div className="h-48 bg-gray-200 overflow-hidden relative">
+                      <ImageWithFallback
                         src={news.urlToImage}
                         alt={news.title}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        fill
+                        className="hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                   )}
