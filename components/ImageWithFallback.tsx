@@ -17,13 +17,14 @@ export default function ImageWithFallback({
   fill = false,
   priority = false,
 }: ImageWithFallbackProps) {
-  // Don't render if no valid src
+  // Hooks must be called unconditionally
+  const [imgSrc, setImgSrc] = useState(src || '');
+  const [hasError, setHasError] = useState(false);
+
+  // Don't render if no valid src (check after hooks)
   if (!src || src.trim() === '' || src === 'null' || src === 'undefined') {
     return null;
   }
-
-  const [imgSrc, setImgSrc] = useState(src);
-  const [hasError, setHasError] = useState(false);
 
   // Fallback placeholder SVG
   const fallbackSrc = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTVlN2ViIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzljYTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+';

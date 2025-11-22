@@ -106,15 +106,15 @@ export async function fetchTrendingNews(): Promise<NewsArticle[]> {
           
           return {
             id: generateNewsId(title, source, publishedAt),
-            title: title.trim(),
+            title: (title || '').trim(),
             description: (article.description || 'Read the full article for more details.').trim(),
             url: article.url || '#',
             // Use the actual image URL from API, filter out null/empty values
-            urlToImage: article.urlToImage && article.urlToImage !== 'null' && article.urlToImage.trim() !== '' ? article.urlToImage.trim() : undefined,
+            urlToImage: article.urlToImage && article.urlToImage !== 'null' && typeof article.urlToImage === 'string' && article.urlToImage.trim() !== '' ? article.urlToImage.trim() : undefined,
             publishedAt,
-            source: source.trim(),
-            content: content.trim(),
-            htmlContent: isHtml ? content.trim() : undefined,
+            source: (source || '').trim(),
+            content: (content || '').trim(),
+            htmlContent: isHtml ? (content || '').trim() : undefined,
             isHtml: isHtml,
           };
         });
@@ -236,15 +236,15 @@ export async function fetchNewsByCategory(category: string = 'technology', pageS
           
           return {
             id: generateNewsId(title, source, publishedAt),
-            title: title.trim(),
+            title: (title || '').trim(),
             description: (article.description || 'Read the full article for more details.').trim(),
             url: article.url || '#',
             // Use the actual image URL from API, filter out null/empty values
-            urlToImage: article.urlToImage && article.urlToImage !== 'null' && article.urlToImage.trim() !== '' ? article.urlToImage.trim() : undefined,
+            urlToImage: article.urlToImage && article.urlToImage !== 'null' && typeof article.urlToImage === 'string' && article.urlToImage.trim() !== '' ? article.urlToImage.trim() : undefined,
             publishedAt,
-            source: source.trim(),
-            content: content.trim(),
-            htmlContent: isHtml ? content.trim() : undefined,
+            source: (source || '').trim(),
+            content: (content || '').trim(),
+            htmlContent: isHtml ? (content || '').trim() : undefined,
             isHtml: isHtml,
           };
         });
